@@ -8,6 +8,7 @@ import { Payment } from '@/modules/payment/payment.model';
 import { Product } from '@/modules/product/product.model';
 import { Cart } from '@/modules/cart/cart.model';
 import { Coupon } from '@/modules/coupon/coupon.model';
+import { User } from '@/modules/user/user.model';
 import { createNotification } from '@/modules/notification/notification.service';
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY || 'dummy_stripe_secret_key', {
@@ -99,6 +100,18 @@ export const processPaymentIntentSuccess = async (paymentIntentId: string) => {
     message: `Payment for order ${order.orderNumber} was received. We are processing your shipment.`,
     link: `/dashboard/orders/${order.orderNumber}`,
   });
+
+  // Notify admins
+  const admins = await User.find({ role: 'admin' });
+  for (const admin of admins) {
+    await createNotification({
+      user: String(admin._id),
+      type: 'system',
+      title: 'New Order Received',
+      message: `Order ${order.orderNumber} has been paid and is ready for processing.`,
+      link: `/dashboard/orders/${order.orderNumber}`,
+    });
+  }
 
   console.log(`✅ Webhook payment processing complete for order ${order.orderNumber}.`);
 };
