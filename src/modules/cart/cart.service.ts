@@ -104,7 +104,18 @@ export const addToCart = async (userId: string, input: AddToCartInput): Promise<
   if (!product || !product.isActive) {
     throw new ApiError(HttpStatus.NOT_FOUND, 'Product not found');
   }
-  if (product.stock < input.quantity) {
+
+  let availableStock = product.stock;
+  if (input.selectedVariant) {
+    const variant = product.variants.find(
+      (v) => v.name === input.selectedVariant?.name && v.value === input.selectedVariant?.value,
+    );
+    if (variant) {
+      availableStock = variant.stock;
+    }
+  }
+
+  if (availableStock < input.quantity) {
     throw new ApiError(HttpStatus.BAD_REQUEST, 'Not enough stock available');
   }
 
@@ -139,6 +150,25 @@ export const updateCartItem = async (
 
   const item = cart.items.find((i) => String(i.product) === productId);
   if (!item) throw new ApiError(HttpStatus.NOT_FOUND, 'Item not in cart');
+
+  const product = await Product.findById(productId);
+  if (!product || !product.isActive) {
+    throw new ApiError(HttpStatus.NOT_FOUND, 'Product not found');
+  }
+
+  let availableStock = product.stock;
+  if (item.selectedVariant) {
+    const variant = product.variants.find(
+      (v) => v.name === item.selectedVariant?.name && v.value === item.selectedVariant?.value,
+    );
+    if (variant) {
+      availableStock = variant.stock;
+    }
+  }
+
+  if (availableStock < quantity) {
+    throw new ApiError(HttpStatus.BAD_REQUEST, 'Not enough stock available');
+  }
 
   item.quantity = quantity;
   await cart.save();
