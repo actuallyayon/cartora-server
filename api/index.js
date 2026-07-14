@@ -1,9 +1,9 @@
-const app = require('../dist/app').default;
-const { connectDB } = require('../dist/config/db');
+import app from '../dist/app.js';
+import { connectDB } from '../dist/config/db.js';
 
 let isConnected = false;
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   if (!isConnected) {
     try {
       await connectDB();
