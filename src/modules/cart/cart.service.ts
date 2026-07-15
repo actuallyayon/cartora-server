@@ -110,7 +110,7 @@ export const addToCart = async (userId: string, input: AddToCartInput): Promise<
     const variant = product.variants.find(
       (v) => v.name === input.selectedVariant?.name && v.value === input.selectedVariant?.value,
     );
-    if (variant) {
+    if (variant && variant.stock > 0) {
       availableStock = variant.stock;
     }
   }
@@ -161,7 +161,7 @@ export const updateCartItem = async (
     const variant = product.variants.find(
       (v) => v.name === item.selectedVariant?.name && v.value === item.selectedVariant?.value,
     );
-    if (variant) {
+    if (variant && variant.stock > 0) {
       availableStock = variant.stock;
     }
   }
