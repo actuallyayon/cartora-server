@@ -40,10 +40,7 @@ export const processCheckout = async (userId: string, input: CheckoutInput) => {
     const product = item.product as unknown as IProduct & { _id: Types.ObjectId }; // Cast populated mongoose ref
 
     if (!product || !product.isActive) {
-      throw new ApiError(
-        HttpStatus.BAD_REQUEST,
-        `Product “${product?.name || 'Unknown'}” is no longer available.`
-      );
+      continue; // Skip invalid products (matches cart view behavior)
     }
 
     if (product.stock < item.quantity) {
@@ -66,6 +63,10 @@ export const processCheckout = async (userId: string, input: CheckoutInput) => {
       quantity: item.quantity,
       subtotal: itemSubtotal,
     });
+  }
+
+  if (itemsToCreate.length === 0) {
+    throw new ApiError(HttpStatus.BAD_REQUEST, 'None of the items in your cart are currently available.');
   }
 
   // 3. Apply coupon validation if present
