@@ -69,6 +69,12 @@ export const listProducts = async (query: ListProductsQuery, isAdmin = false) =>
   if (query.featured === 'true') {
     filter.isFeatured = true;
   }
+  if (query.newArrival === 'true') {
+    filter.isNewArrival = true;
+  }
+  if (query.bestSeller === 'true') {
+    filter.isBestSeller = true;
+  }
 
   const { page, limit, skip } = getPagination(query.page, query.limit);
   const sort = SORT_MAP[query.sort ?? 'newest'] ?? SORT_MAP.newest;

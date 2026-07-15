@@ -32,6 +32,8 @@ export const createProductSchema = z.object({
     specs: z.array(specSchema).default([]),
     tags: z.array(z.string().trim()).default([]),
     isFeatured: z.boolean().optional(),
+    isNewArrival: z.boolean().optional(),
+    isBestSeller: z.boolean().optional(),
     isActive: z.boolean().optional(),
   }),
 });
@@ -61,6 +63,8 @@ export const listProductsSchema = z.object({
     maxPrice: z.coerce.number().min(0).optional(),
     minRating: z.coerce.number().min(0).max(5).optional(),
     featured: z.enum(['true', 'false']).optional(),
+    newArrival: z.enum(['true', 'false']).optional(),
+    bestSeller: z.enum(['true', 'false']).optional(),
     sort: z.enum(['newest', 'price-asc', 'price-desc', 'rating', 'popular']).optional(),
     page: z.coerce.number().int().min(1).optional(),
     limit: z.coerce.number().int().min(1).max(60).optional(),

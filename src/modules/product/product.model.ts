@@ -39,6 +39,8 @@ export interface IProduct {
   rating: IProductRating;
   soldCount: number;
   isFeatured: boolean;
+  isNewArrival: boolean;
+  isBestSeller: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -89,6 +91,8 @@ const productSchema = new Schema<IProduct, ProductModel>(
     },
     soldCount: { type: Number, default: 0, min: 0 },
     isFeatured: { type: Boolean, default: false, index: true },
+    isNewArrival: { type: Boolean, default: false, index: true },
+    isBestSeller: { type: Boolean, default: false, index: true },
     isActive: { type: Boolean, default: true, index: true },
   },
   baseSchemaOptions,
