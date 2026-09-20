@@ -35,5 +35,34 @@ export const generateProductSchema = z.object({
   }),
 });
 
+export const compareProductsSchema = z.object({
+  body: z.object({
+    productIds: z
+      .array(z.string().min(1))
+      .min(1, 'At least 1 product ID or slug is required')
+      .max(4, 'Maximum 4 products can be compared at once'),
+    userPriority: z.string().max(300).optional(),
+  }),
+});
+
+export const cartOptimizerSchema = z.object({
+  body: z.object({
+    items: z
+      .array(
+        z.object({
+          productId: z.string().min(1),
+          name: z.string().min(1),
+          price: z.number().nonnegative(),
+          quantity: z.number().int().positive(),
+          category: z.string().optional(),
+        }),
+      )
+      .min(1, 'At least 1 cart item is required'),
+    userNote: z.string().max(300).optional(),
+  }),
+});
+
 export type AiChatInput = z.infer<typeof aiChatSchema>['body'];
 export type GenerateProductInput = z.infer<typeof generateProductSchema>['body'];
+export type CompareProductsInput = z.infer<typeof compareProductsSchema>['body'];
+export type CartOptimizerInput = z.infer<typeof cartOptimizerSchema>['body'];

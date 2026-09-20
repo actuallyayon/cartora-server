@@ -5,8 +5,16 @@ import {
   aiChatSchema,
   productInsightsParamSchema,
   generateProductSchema,
+  compareProductsSchema,
+  cartOptimizerSchema,
 } from '@/modules/ai/ai.validation';
-import { chat, insights, generateProduct } from '@/modules/ai/ai.controller';
+import {
+  chat,
+  insights,
+  generateProduct,
+  compare,
+  optimizeCart,
+} from '@/modules/ai/ai.controller';
 
 const router = Router();
 
@@ -15,6 +23,12 @@ router.post('/chat', validateRequest(aiChatSchema), chat);
 
 // Public product details page AI insights
 router.get('/insights/:productId', validateRequest(productInsightsParamSchema), insights);
+
+// Public storefront AI product comparison & versus matrix
+router.post('/compare', validateRequest(compareProductsSchema), compare);
+
+// Public storefront AI cart optimizer & bundle synergy advisor
+router.post('/cart-optimizer', validateRequest(cartOptimizerSchema), optimizeCart);
 
 // Admin-only AI product generator & copywriter copilot
 router.post(

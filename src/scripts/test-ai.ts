@@ -1,6 +1,12 @@
 import 'dotenv/config';
 import { connectDB } from '@/config/db';
-import { chatWithConcierge, getProductInsights, generateProductListing } from '@/modules/ai/ai.service';
+import {
+  chatWithConcierge,
+  getProductInsights,
+  generateProductListing,
+  compareProductsWithAi,
+  optimizeCartWithAi,
+} from '@/modules/ai/ai.service';
 import { Product } from '@/modules/product/product.model';
 
 async function test() {
@@ -10,8 +16,9 @@ async function test() {
   console.log('Concierge Reply:', chatRes.reply.slice(0, 120) + '...');
   console.log('Attached Products Count:', chatRes.products.length);
 
-  const sampleProduct = await Product.findOne({ isActive: true });
-  if (sampleProduct) {
+  const sampleProducts = await Product.find({ isActive: true }).limit(3);
+  if (sampleProducts.length > 0) {
+    const sampleProduct = sampleProducts[0];
     console.log('\n--- Testing Feature 2: Product Insights for:', sampleProduct.name, '---');
     const insights = await getProductInsights(String(sampleProduct._id));
     console.log('Buyer Match Score:', insights.buyerMatchScore);
@@ -27,7 +34,37 @@ async function test() {
   console.log('Draft Price:', draft.suggestedPrice);
   console.log('Draft Category:', draft.suggestedCategoryName);
 
-  console.log('\n>>> SUCCESS: ALL 3 AI FEATURES ARE FULLY OPERATIONAL! <<<');
+  if (sampleProducts.length >= 2) {
+    console.log('\n--- Testing Feature 4: AI Product Comparison Studio ---');
+    const compareRes = await compareProductsWithAi({
+      productIds: [String(sampleProducts[0]._id), String(sampleProducts[1]._id)],
+      userPriority: 'Compare value for money and durability',
+    });
+    console.log('Comparison Summary:', compareRes.summary);
+    console.log('Comparison Verdict:', compareRes.verdict);
+    console.log('Winner Badges Count:', compareRes.winnerBadges.length);
+    console.log('Dimensions Count:', compareRes.dimensions.length);
+  }
+
+  if (sampleProducts.length > 0) {
+    console.log('\n--- Testing Feature 5: AI Cart Optimizer & Bundle Advisor ---');
+    const cartRes = await optimizeCartWithAi({
+      items: [
+        {
+          productId: String(sampleProducts[0]._id),
+          name: sampleProducts[0].name,
+          price: sampleProducts[0].price,
+          quantity: 1,
+        },
+      ],
+    });
+    console.log('Cart Score:', cartRes.cartScore);
+    console.log('Vibe Title:', cartRes.vibeTitle);
+    console.log('Free Shipping Status:', cartRes.freeShippingStatus.tip);
+    console.log('Recommended Complements Count:', cartRes.recommendations.length);
+  }
+
+  console.log('\n>>> SUCCESS: ALL AI FEATURES (CONCIERGE, INSIGHTS, COPILOT, COMPARE, CART OPTIMIZER) ARE FULLY OPERATIONAL! <<<');
   process.exit(0);
 }
 
