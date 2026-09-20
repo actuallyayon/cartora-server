@@ -17,8 +17,9 @@ async function run() {
       quantity: 1,
     });
     console.log('Success:', JSON.stringify(cart, null, 2));
-  } catch (err: any) {
-    console.error('Error:', err.message, err.stack);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('Error:', message);
   }
   process.exit(0);
 }
