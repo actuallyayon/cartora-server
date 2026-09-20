@@ -19,6 +19,7 @@ import { addressRoutes } from '@/modules/address/address.routes';
 import { notificationRoutes } from '@/modules/notification/notification.routes';
 import { userRoutes } from '@/modules/user/user.routes';
 import { analyticsRoutes } from '@/modules/analytics/analytics.routes';
+import { aiRoutes } from '@/modules/ai/ai.routes';
 
 /**
  * Root API v1 router. Feature module routers (auth, products, orders, …) are
@@ -57,5 +58,7 @@ router.use('/addresses', addressRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/users', userRoutes);
 router.use('/analytics', analyticsRoutes);
+router.use('/ai', aiRoutes);
 
 export const apiV1Router = router;
+
