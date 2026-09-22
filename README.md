@@ -1,12 +1,33 @@
 # 🛒 Cartora — Modern E-Commerce Platform (Server)
 
-The backend API powering **Cartora** — a full-featured e-commerce platform. Built with **Express 5**, **TypeScript**, **MongoDB (Mongoose)**, and **Stripe** for payment processing. Features a modular, RESTful architecture with JWT authentication, Google OAuth, file uploads, and real-time order notifications.
+The backend API powering **Cartora** — a full-featured e-commerce platform. Built with **Express 5**, **TypeScript**, **MongoDB (Mongoose)**, **Stripe** for payment processing, and **Google Gemini AI** for intelligent shopping features. Features a modular, RESTful architecture with JWT authentication, Google OAuth, file uploads, real-time order notifications, and resilient multi-model generative AI endpoints.
 
 > **🔗 Live API:** [cartora-server.vercel.app](https://cartora-server.vercel.app)
 >
 > **🔗 Live Frontend:** [cartora-client.vercel.app](https://cartora-client.vercel.app)
 >
 > **🔗 API Docs:** [cartora-server.vercel.app/api-docs](https://cartora-server.vercel.app/api-docs)
+
+---
+
+## 🤖 AI Engine & Intelligent Endpoints (Google Gemini)
+
+Cartora includes a high-performance, resilient AI engine powered by **Google Gemini** that directly grounds responses in real-time MongoDB inventory, categories, and customer reviews.
+
+### 🛡️ Multi-Model Fallback & Resilient Architecture
+- **Automatic Fallback Chain** — Sequentially cascades across top Google Gemini Flash models (`gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-1.5-flash-8b`) with exponential backoff and retry handling to guarantee uninterrupted availability.
+- **Strict JSON Schema Enforcement** — All AI endpoints return strictly typed, validated JSON structures matching frontend contracts.
+- **Live Catalog Grounding** — Queries real database records before prompting Gemini to eliminate hallucinations and ensure accurate pricing, availability, and specs.
+
+### 📡 AI Endpoints Summary
+
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/ai/chat` | Public | **AI Shopping Concierge** — Conversational product search with natural language understanding and live product card suggestions |
+| `GET` | `/api/v1/ai/insights/:productId` | Public | **AI Product Insights** — Synthesizes specs and customer reviews into an instant 0–100% Buyer Match Score, pros/cons, and verdict |
+| `POST` | `/api/v1/ai/compare` | Public | **AI Comparison Studio** — Multi-product versus matrix with dynamic scoring across dimensions and winner badge awards |
+| `POST` | `/api/v1/ai/cart-optimizer` | Public | **AI Cart Optimizer** — Cart synergy & vibe score, free shipping threshold analysis, and live companion add-on recommendations |
+| `POST` | `/api/v1/ai/generate-product` | Admin | **AI Product Copilot** — Generates complete SEO-optimized product titles, descriptions, categories, specs, tags, and pricing |
 
 ---
 
@@ -18,6 +39,7 @@ The backend API powering **Cartora** — a full-featured e-commerce platform. Bu
 | Framework      | [Express 5](https://expressjs.com/)                            |
 | Language       | [TypeScript](https://www.typescriptlang.org/)                  |
 | Database       | [MongoDB](https://www.mongodb.com/) + [Mongoose 9](https://mongoosejs.com/) |
+| AI Engine      | [Google Gemini API](https://ai.google.dev/) (Flash Family)     |
 | Authentication | [JWT](https://jwt.io/) + [Google OAuth](https://developers.google.com/identity) |
 | Payments       | [Stripe](https://stripe.com/) (Payment Intents + Webhooks)    |
 | Validation     | [Zod](https://zod.dev/)                                       |
@@ -29,6 +51,13 @@ The backend API powering **Cartora** — a full-featured e-commerce platform. Bu
 ---
 
 ## ✨ Core Features
+
+### 🤖 AI-Powered Capabilities
+- **Shopping Concierge** — Interactive natural language assistant with catalog-grounded recommendations
+- **Product Insights & Review Analyzer** — Instant Buyer Match Score (0–100%), pros/cons breakdown, and honest verdict
+- **Comparison Studio Engine** — Multi-product head-to-head evaluation with dimensional scoring and winner badges
+- **Cart Synergy & Bundle Optimizer** — Live cart vibe scoring, free shipping threshold helper, and companion cross-sells
+- **Admin Product Copilot** — Automatic generation of product listings, SEO descriptions, and technical specifications
 
 ### 🔐 Authentication & Authorization
 - **JWT-based auth** with HTTP-only cookie tokens (access + refresh)
@@ -125,24 +154,32 @@ Create a `.env` file in the project root:
 PORT=5000
 NODE_ENV=development
 
-# Database
-MONGO_URI=mongodb+srv://your_connection_string
+# Client URL (for CORS)
+CLIENT_ORIGINS=http://localhost:3000
 
-# JWT
-JWT_ACCESS_SECRET=your_access_secret
-JWT_REFRESH_SECRET=your_refresh_secret
+# Database
+MONGODB_URI=mongodb+srv://your_connection_string
+
+# JWT Authentication
+JWT_ACCESS_SECRET=your_access_secret_min_32_characters
+JWT_REFRESH_SECRET=your_refresh_secret_min_32_characters
 JWT_ACCESS_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
 
-# Stripe
+# Google Gemini AI
+GEMINI_API_KEY=your_gemini_api_key
+
+# Stripe Payments
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
 
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
+# Image Hosting
+IMGBB_API_KEY=your_imgbb_api_key
 
-# Client URL (for CORS)
-CLIENT_URL=http://localhost:3000
+# Google OAuth (Optional)
+GOOGLE_OAUTH_CLIENT_ID=your_google_client_id
+GOOGLE_OAUTH_SECRET=your_google_client_secret
 ```
 
 ### 4. Seed the database (optional)
@@ -170,9 +207,10 @@ npm start
 ```
 src/
 ├── config/                 # App configuration (env vars, DB connection)
-├── middleware/              # Auth, error handling, validation, upload
+├── middlewares/            # Auth, error handling, validation, upload
 ├── modules/                # Feature-based modules
 │   ├── address/            # Shipping address CRUD
+│   ├── ai/                 # Gemini AI concierge, insights, compare & optimizer
 │   ├── analytics/          # Admin analytics & KPIs
 │   ├── auth/               # Login, register, Google OAuth, JWT
 │   ├── banner/             # Homepage banners
@@ -188,7 +226,7 @@ src/
 │   ├── upload/             # Image upload handling
 │   ├── user/               # User profiles & admin user mgmt
 │   └── wishlist/           # Wishlist management
-├── shared/                 # Shared utilities (base model, helpers)
+├── shared/                 # Shared utilities (base model, helpers, ApiError)
 ├── scripts/                # Database seed scripts
 └── server.ts               # Application entry point
 ```
